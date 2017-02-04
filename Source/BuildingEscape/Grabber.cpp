@@ -5,25 +5,46 @@
 #define OUT
 
 // Sets default values for this component's properties
-UGrabber::UGrabber() : reach(100.f)
+UGrabber::UGrabber() :
+	reach(100.f),
+	PhysicsHandle(nullptr),
+	InputComponent(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	//bWantsBeginPlay = true;
-
-	// ...
 }
-
 
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	UE_LOG(LogTemp, Warning, TEXT("Grabber Reporting For Duty"));
+	FindPhysicsHandleComponent();
 
+	FindInputComponent();
+}
+
+void UGrabber::FindInputComponent()
+{
+	/// Only Appears at runtime
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (!InputComponent) {
+		UE_LOG(LogTemp, Error, TEXT("Grabber unable to find input component on %s."), *(GetOwner()->GetName()));
+	}
+	else {
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+}
+
+void UGrabber::FindPhysicsHandleComponent()
+{
+	/// Look for attached Physics handle
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysicsHandle) {
+		UE_LOG(LogTemp, Error, TEXT("Grabber unable to find physics handle on %s."), *(GetOwner()->GetName()));
+	}
 }
 
 
@@ -55,10 +76,13 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	/// Find what we hit.
 	AActor* ActorHit = Hit.GetActor();
 	if (ActorHit) {
-		UE_LOG(LogTemp, Warning, TEXT("Contact with: %s"), *(ActorHit->GetName()));
+		//UE_LOG(LogTemp, Warning, TEXT("Contact with: %s"), *(ActorHit->GetName()));
 	}
-
-	
-	
 }
 
+void UGrabber::Grab() {
+	UE_LOG(LogTemp, Warning, TEXT("Grab Pressed"))
+}
+void UGrabber::Release() {
+	UE_LOG(LogTemp, Warning, TEXT("Grab Released"))
+}

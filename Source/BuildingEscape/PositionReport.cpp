@@ -21,7 +21,6 @@ void UPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 	FVector location = GetOwner()->GetTransform().GetLocation();
-	//UE_LOG(LogTemp, Warning, TEXT("Position Report Reporting on %s"), *(GetOwner()->GetName()));
 	UE_LOG(LogTemp, Warning, TEXT("Position Report Reporting on %s is at x: %f, y: %f, z: %f"), *(GetOwner()->GetName()), location.X, location.Y, location.Z);
 }
 
