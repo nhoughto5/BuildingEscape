@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "Grabber.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLightEvent);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BUILDINGESCAPE_API UGrabber : public UActorComponent
@@ -21,6 +22,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UPROPERTY(BlueprintAssignable)
+	FLightEvent LightOn;
+
+	UPROPERTY(BlueprintAssignable)
+	FLightEvent LightOff;
 private:
 	float reach;
 	UPhysicsHandleComponent* PhysicsHandle;
@@ -31,4 +37,6 @@ private:
 	void FindPhysicsHandleComponent();
 	void FindInputComponent();
 	const FHitResult GetFirstPhysicsBodyInReach();
+	FVector GetReachLineEnd();
+	FVector GetReachLineStart();
 };

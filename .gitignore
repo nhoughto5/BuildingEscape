@@ -5,3 +5,5 @@ Build/
 DerivedDataCache/
 Content/StarterContent
 *.VC.db
+*.VC.opendb
+*.sln

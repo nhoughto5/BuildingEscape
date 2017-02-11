@@ -2,10 +2,12 @@
 
 #include "BuildingEscape.h"
 #include "OpenDoor.h"
-
+#define OUT
 
 // Sets default values for this component's properties
-UOpenDoor::UOpenDoor()
+UOpenDoor::UOpenDoor() :
+	PressurePlate(nullptr),
+	Owner(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -19,45 +21,53 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 	Owner = GetOwner();
-}
-
-void UOpenDoor::OpenDoor()
-{
-	Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+	if (!PressurePlate) {
+		UE_LOG(LogTemp, Error, TEXT("Pressure Plate missing on %s."), *(GetOwner()->GetName()));
+	}
 }
 
 void UOpenDoor::CloseDoor()
 {
+	if (!Owner) { return; }
 	Owner->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
 }
 
 
 // Called every frame
-void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
+void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
-		OpenDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+	if (GetTotalMassOfActorsOnPlate() > TriggerMass) {
+		OnOpen.Broadcast();
 	}
-	
-	//Check if time to close door
-	if (IsTimeToCloseDoor()) {
-		CloseDoor();
+	else {
+		OnClose.Broadcast();
 	}
 }
 
-bool inline UOpenDoor::IsTimeToCloseDoor()
-{
-	float currentTime = GetWorld()->GetTimeSeconds();
-	if ((currentTime - LastDoorOpenTime) >= DoorCloseDelay) {
-		return true;
+//bool inline UOpenDoor::IsTimeToCloseDoor()
+//{
+//	float currentTime = GetWorld()->GetTimeSeconds();
+//	if ((currentTime - LastDoorOpenTime) >= DoorCloseDelay) {
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
+//}
+
+float UOpenDoor::GetTotalMassOfActorsOnPlate() {
+	float totalMass = 0.f;
+	/// Find all overlapping actors
+	TArray<AActor*> Actors;
+	if (!PressurePlate) { return totalMass; }
+	PressurePlate->GetOverlappingActors(OUT Actors);
+	/// Iterate through actors and sum mass
+	for (const auto& actor : Actors) {
+		totalMass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
 	}
-	else {
-		return false;
-	}
+	return totalMass;
 }
 
