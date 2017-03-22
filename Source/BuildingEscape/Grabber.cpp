@@ -91,6 +91,9 @@ void UGrabber::Release() {
 	if (!PhysicsHandle) { return; }
 
 	//Turn Off Light on Statue
+	if (!CurrentlyHeldActor) {
+		return;
+	}
 	if (CurrentlyHeldActor->ActorHasTag("LightStatue")) {
 		LightOff.Broadcast();
 	}

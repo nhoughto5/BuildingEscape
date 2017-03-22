@@ -31,7 +31,7 @@ private:
 	float reach;
 	UPhysicsHandleComponent* PhysicsHandle;
 	UInputComponent* InputComponent;
-
+	AActor *CurrentlyHeldActor;
 	void Grab();
 	void Release();
 	void FindPhysicsHandleComponent();
